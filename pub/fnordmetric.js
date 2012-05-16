@@ -995,8 +995,8 @@ var FnordMetric = (function(){
           ).append(
             $('<span class="history"></span>').html('history')
             .click(function(){
-              setCheckboxesCheckedState(true, false);              
-              updateEventFilter(); 
+              setCheckboxesCheckedState(true, false);
+              updateEventFilter();
               loadEventHistory({session_key: session_data["session_key"]});
             })
           ).attr('data-session', session_data["session_key"])
@@ -1009,7 +1009,6 @@ var FnordMetric = (function(){
       var event_time = $('<span class="time"></span>');
       var event_message = $('<span class="message"></span>');
       var event_props = $('<span class="properties"></span>');
-      var event_picture = $('<div class="picture"></picture>');
 
       var event_type = event_data._type;
 
@@ -1022,7 +1021,18 @@ var FnordMetric = (function(){
       } else if(event_type.substr(0,5) == '_set_'){
         return true; /* dont render */
       } else {
-        event_message.html(event_type);
+        event_message.append(event_type);
+        if(event_data.url) {
+          event_message.append(': <a href="' + event_data.url + '">' + event_data.url + '</a><br>');
+        }
+        var list = $('<dl style="display: none"></dl>');
+        for (var key in event_data) {
+          if (event_data.hasOwnProperty(key) && key.substr(0,1) !== '_') {
+            list.append('<dt>'+key+'</dt><dd>'+event_data[key]+'</dd>');
+          }
+        }
+        event_message.append('<a href="#" onclick="$(this).next().toggle(); return false">...</a>');
+        event_message.append(list);
       }
 
       event_time.html(formatTimeOfDay(event_data._time));
@@ -1041,6 +1051,7 @@ var FnordMetric = (function(){
             );
           }
           if(session_data._picture){
+            var event_picture = $('<div class="picture"></picture>');
             event_picture.append(
               $('<img width="40" />').attr('src', session_data._picture)
             ).click(load_usersession);
