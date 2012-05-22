@@ -41,6 +41,7 @@
   $(document).ready(function(){
 
     FnordMetric.init('#{current_namespace.token}', $('.viewport_inner'));
+    FnordMetric.renderSessionView();
 
     $('#tabs li.dashboard').click(function(){
       FnordMetric.renderDashboard($(this).attr('rel'));
