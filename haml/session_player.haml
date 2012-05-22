@@ -1,0 +1,98 @@
+!!!
+%html
+
+  %head
+    %title=current_namespace.title
+
+    %script(type="text/javascript" src="#{path_prefix}/vendor/jquery-1.6.1.min.js")
+    %script(type="text/javascript" src="#{path_prefix}/vendor/highcharts.js")
+
+    %script(type="text/javascript" src="#{path_prefix}/fnordmetric.js")
+    %link(type="text/css" rel="stylesheet" href="#{path_prefix}/fnordmetric.css")
+    %link(type="text/css" rel="stylesheet" href="#{path_prefix}/session_player.css")
+
+    :javascript
+      FnordMetric.p = '#{path_prefix}';
+
+  %body
+    .topbar{:class => namespaces.count > 1 ? 'shown' : 'hidden'}
+      %ul
+        -namespaces.each do |key,namespace|
+          %li{:class => namespace.token == current_namespace.token ? 'active' : nil}
+            %a{:href=> "#{path_prefix}/#{namespace.token}"}=h namespace.title
+
+    #wrap
+      #tabs
+        %ul
+          - if current_namespace.active_users_available
+            %li.active.sessions
+              .picto.piechart
+              Active Users
+
+          -current_namespace.dashboards.each do |key,dashboard|
+            %li.dashboard{:rel => dashboard.token}
+              .picto.piechart
+              =h dashboard.title
+
+      #viewport
+        .viewport_inner.clearfix
+          - name = 'NONAME'
+          - events.each do |e|
+            - name = events.delete(e)[:name] if e.type == '_set_name'
+          .headbar
+            %h2
+              = name
+            &nbsp;&nbsp;
+            %small= "#{Time.at(events[0][:_time]).strftime('%d-%m-%Y %H:%M:%S')} - #{Time.at(events[-1][:_time]).strftime('%H:%M:%S')}"
+            %a{ class: 'close', href: '#', onclick: "FnordMetric.renderSessionView(); return false;"}='x'
+          %hr
+          - prev_event = {}
+          - events.each_with_index do |event,i|
+            - backed = (event[:referrer] != prev_event[:url] && i > 0)
+            %div{ class: "event", 'data-status' => event[:_status], 'data-xhr' => event[:_xhr], 'data-backed' => backed, 'data-type' => event.type }
+              %time= Time.at(event[:_time]).strftime('%H:%M:%S') if event[:_time]
+              .body
+                %h3
+                  - case
+                  - when event[:title].present?
+                    = event[:title]
+                    %small= event.type
+                  - else
+                    = event.type
+                %a{ class: 'url', href: event[:url] }= event[:url]
+                %details
+                  %summary= "..."
+                  %dl
+                    - event.data.each_pair do |k,v|
+                      - if k.index('_') != 0
+                        %dt= k
+                        %dd= v
+            - if event[:_status] == 200 and not event[:_xhr]
+              - prev_event = event
+
+:javascript
+  FnordMetric.init('#{current_namespace.token}', $('.viewport_inner'));
+
+  $(document).ready(function(){
+    $('#tabs li.dashboard').click(function(){
+      FnordMetric.renderDashboard($(this).attr('rel'));
+      window.location.hash = $(this).attr('rel');
+    });
+
+    $('#tabs li.sessions').click(function(){
+      FnordMetric.renderSessionView();
+      window.location.hash = '';
+    });
+
+    $('#tabs li').click(function(){
+      $(this).addClass('active').siblings().removeClass('active');
+    });
+
+    function resizeViewport(){
+      var viewport_width = window.innerWidth-220
+      $('#viewport').width(viewport_width);
+      FnordMetric.resizeView();
+    }
+    resizeViewport();
+    $(window).resize(resizeViewport);
+  });

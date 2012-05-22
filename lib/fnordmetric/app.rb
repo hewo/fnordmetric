@@ -3,12 +3,6 @@
 class FnordMetric::App < Sinatra::Base
 
   @@sessions = Hash.new
-  @@public_files = {
-    "fnordmetric.css" => "text/css",
-    "fnordmetric.js" => "application/x-javascript",
-    "vendor/jquery-1.6.1.min.js" => "application/x-javascript",
-    "vendor/highcharts.js" => "application/x-javascript"
-  }
 
   if RUBY_VERSION =~ /1.9.\d/
     Encoding.default_external = Encoding::UTF_8
@@ -16,8 +10,9 @@ class FnordMetric::App < Sinatra::Base
 
   enable :session
 
+  set :public_folder, 'public'
   set :haml, :format => :html5
-  set :views, ::File.expand_path('../../../haml', __FILE__)  
+  set :views, ::File.expand_path('../../../haml', __FILE__)
 
   def initialize(namespaces, opts)
     @namespaces = {}
@@ -104,7 +99,7 @@ class FnordMetric::App < Sinatra::Base
       current_namespace.events(:by_type, :type => params[:type])
     elsif params[:session_key]
       current_namespace.events(:by_session_key, :session_key => params[:session_key])
-    else 
+    else
       find_opts = { :limit => 100 }
       find_opts.merge!(:since => params[:since].to_i+1) if params[:since]
       current_namespace.events(:all, find_opts)
@@ -131,12 +126,11 @@ class FnordMetric::App < Sinatra::Base
     track_event((8**32).to_s(36), parse_params(params))
   end
 
-  @@public_files.each do |public_file, public_file_type|
-    get "/#{public_file}" do
-      content_type(public_file_type)
-      ::File.open(::File.expand_path("../../../pub/#{public_file}", __FILE__)).read
-    end
+  get '/:namespace/play/:session_key' do
+    events = current_namespace.events(:by_session_key, :session_key => params[:session_key])
+    haml :session_player, locals: { :events => events }
   end
+
 private
 
   def parse_params(hash)
