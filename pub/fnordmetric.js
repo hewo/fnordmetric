@@ -5,6 +5,12 @@ var FnordMetric = (function(){
   var currentNamespace = false;
   var currentView = false;
   var currentWidgetUID=23;
+  
+  Highcharts.setOptions({
+    global: {
+      useUTC: false	
+    }
+  })
 
   function decPrint(val){
     return (val < 10 ? '0'+val : val);
