@@ -47,7 +47,7 @@
             %a{ class: 'close', href: '#', onclick: "FnordMetric.renderSessionView(); return false;"}='x'
           %hr
           - prev_event = {}
-          - events.each_with_index do |event,i|
+          - events.reverse.each_with_index do |event,i|
             - backed = (event[:referrer] != prev_event[:url] && i > 0)
             %div{ class: "event", 'data-status' => event[:_status], 'data-xhr' => event[:_xhr], 'data-backed' => backed, 'data-type' => event.type }
               %time= Time.at(event[:_time]).strftime('%H:%M:%S') if event[:_time]
