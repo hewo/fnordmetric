@@ -43,11 +43,10 @@
             %h2
               = name
             &nbsp;&nbsp;
-            %small= "#{Time.at(events[0][:_time]).strftime('%d-%m-%Y %H:%M:%S')} - #{Time.at(events[-1][:_time]).strftime('%H:%M:%S')}"
             %a{ class: 'close', href: '#', onclick: "FnordMetric.renderSessionView(); return false;"}='x'
           %hr
           - prev_event = {}
-          - events.reverse.each_with_index do |event,i|
+          - events.reverse.reject{|x| x.type.start_with? '_'}.each_with_index do |event,i|
             - backed = (event[:referrer] != prev_event[:url] && i > 0)
             %div{ class: "event", 'data-status' => event[:_status], 'data-xhr' => event[:_xhr], 'data-backed' => backed, 'data-type' => event.type }
               %time= Time.at(event[:_time]).strftime('%H:%M:%S') if event[:_time]

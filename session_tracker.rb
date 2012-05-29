@@ -50,13 +50,15 @@ FnordMetric.namespace site do
 # ---------------------------------------------------------------
 
   event :"document#chunk" do
-    incr_field :document_per_product_monthly, data[:product]
-    incr_field :document_per_module_monthly, data[:module]
+    if data[:product] && data[:module]
+      incr_field :document_per_product_monthly, data[:product]
+      incr_field :document_per_module_monthly, data[:module]
+    end
     incr_field :top_documents, data[:title]
     if data[:rank]
       incr_field :click_hit_number, data[:rank].to_i
     end
-    if data[:referrer].include?('/search') && !data[:url].include?('frt=')
+    if data[:referrer] && data[:referrer].include?('/search') && !data[:url].include?('frt=')
       incr_field :click_hit_number, 0
     end
   end
