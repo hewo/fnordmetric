@@ -15,7 +15,7 @@ task :worker do
 end
 
 task :log do
-  FnordMetric::Logger.start(dump_file_path, FnordMetric.options
+  FnordMetric::Logger.start(dump_file_path, FnordMetric.options)
 end
 
 task :import do
