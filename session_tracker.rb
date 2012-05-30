@@ -50,6 +50,8 @@ FnordMetric.namespace site do
   gauge :by_other, :tick => 1.month.to_i, :title => "other"
   gauge :by_superhit, :tick => 1.month.to_i, :title => "superhit"
   gauge :by_direct, :tick => 1.month.to_i, :title => "direct link"
+  gauge :by_link, :tick => 1.month.to_i, :title => "link/relation"
+
 # ---------------------------------------------------------------
 # Event handling
 # ---------------------------------------------------------------
@@ -75,6 +77,8 @@ FnordMetric.namespace site do
         incr :by_toc
       elsif data[:referrer].include?(topid)
         incr :by_internal
+      elsif data[:referrer].include?('/document/')
+        incr :by_link
       else
         incr :by_other
       end
@@ -155,7 +159,7 @@ FnordMetric.namespace site do
     :title => "How documents are reached",
     :type => :pie,
     :width => 50,
-    :gauges => [:by_toc, :by_search, :by_direct, :by_superhit, :by_other]
+    :gauges => [:by_toc, :by_search, :by_direct, :by_superhit, :by_link, :by_other]
   }
 
   widget 'Documents', {
