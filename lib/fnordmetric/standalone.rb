@@ -1,7 +1,7 @@
 require 'rake'
 require 'redis'
 
-task :run do  
+task :run do
   FnordMetric.run
 end
 
@@ -15,11 +15,11 @@ task :worker do
 end
 
 task :log do
-  FnordMetric::Logger.start(dump_file_path)
+  FnordMetric::Logger.start(dump_file_path, FnordMetric.options
 end
 
 task :import do
-  FnordMetric::Logger.import(dump_file_path)
+  FnordMetric::Logger.import(dump_file_path, FnordMetric.options)
 end
 
 task :help do
