@@ -44,22 +44,42 @@ FnordMetric.namespace site do
   gauge :search_goto, :tick => 1.month.to_i, :title => "Search goto"
   gauge :superhit, :tick => 1.month.to_i, :title => "Superhits clicked"
 
-
+  gauge :by_search, :tick => 1.month.to_i, :title => "search"
+  gauge :by_toc, :tick => 1.month.to_i, :title => "toc"
+  gauge :by_internal, :tick => 1.month.to_i, :title => "internal_navigation"
+  gauge :by_other, :tick => 1.month.to_i, :title => "other"
+  gauge :by_superhit, :tick => 1.month.to_i, :title => "superhit"
+  gauge :by_direct, :tick => 1.month.to_i, :title => "direct link"
 # ---------------------------------------------------------------
 # Event handling
 # ---------------------------------------------------------------
 
   event :"document#chunk" do
-    if data[:product] && data[:module]
-      incr_field :document_per_product_monthly, data[:product]
-      incr_field :document_per_module_monthly, data[:module]
+    # since most document request are cached, we need to extract topid from url instead
+    topid = data[:url].match(/\/document\/(\d+)\//)[1]
+    versid = data[:url].match(/versid=(\d+-\d+-\d+)/)[1]
+    if versid && topid
+      incr_field :top_documents, topid
+      incr_field :document_per_module_monthly, versid
     end
-    incr_field :top_documents, data[:title]
-    if data[:rank]
-      incr_field :click_hit_number, data[:rank].to_i
-    end
-    if data[:referrer] && data[:referrer].include?('/search') && !data[:url].include?('frt=')
-      incr_field :click_hit_number, 0
+    if data[:referrer]
+      if data[:referrer].include?('/search')
+        if data[:url].include?('frt=')
+          incr :by_search
+          incr_field :click_hit_number, data[:rank].to_i if data[:rank]
+        else
+          incr :by_superhit
+          incr_field :click_hit_number, 0
+        end
+      elsif data[:referrer].include?('/toc/')
+        incr :by_toc
+      elsif data[:referrer].include?(topid)
+        incr :by_internal
+      else
+        incr :by_other
+      end
+    else
+      incr :by_direct
     end
   end
 
@@ -68,13 +88,13 @@ FnordMetric.namespace site do
   end
 
   event :"search#index" do
-    incr_field :search_query, data[:query]
+    incr_field :search_query, data[:title]
     if data[:goto]
       incr :search_goto
     else
       incr :search_regular
       if data[:hits].to_i == 0
-        incr_field :empty_searches, data[:query]
+        incr_field :empty_searches, data[:title]
       end
     end
   end
@@ -83,27 +103,11 @@ FnordMetric.namespace site do
 # Widgets
 # ---------------------------------------------------------------
 
-  widget 'Kgonline', {
-    :title => "Top Products",
-    :type => :toplist,
-    :width => 100,
-    :gauges => :document_per_product_monthly,
-    :include_current => true
-  }
-
-  widget 'Kgonline', {
-    :title => "Top modules",
+  widget 'Products', {
+    :title => "Top products (versid)",
     :type => :toplist,
     :width => 100,
     :gauges => :document_per_module_monthly,
-    :include_current => true
-  }
-
-  widget 'Kgonline', {
-    :title => "Top documents",
-    :type => :toplist,
-    :width => 100,
-    :gauges => :top_documents,
     :include_current => true
   }
 
@@ -134,7 +138,7 @@ FnordMetric.namespace site do
   widget 'Feature use', {
     :title => "Clicked hit number",
     :type => :bars,
-    :width => 50,
+    :width => 100,
     :order_by => :field,
     :gauges => :click_hit_number,
     :include_current => true
@@ -145,6 +149,21 @@ FnordMetric.namespace site do
     :type => :pie,
     :width => 50,
     :gauges => [:search_regular, :search_goto]
+  }
+
+  widget 'Documents', {
+    :title => "How documents are reached",
+    :type => :pie,
+    :width => 50,
+    :gauges => [:by_toc, :by_search, :by_direct, :by_superhit, :by_other]
+  }
+
+  widget 'Documents', {
+    :title => "Top documents",
+    :type => :toplist,
+    :width => 50,
+    :gauges => :top_documents,
+    :include_current => true
   }
 
   # -------------------------------------------------------
