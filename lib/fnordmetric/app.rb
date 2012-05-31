@@ -10,7 +10,7 @@ class FnordMetric::App < Sinatra::Base
 
   enable :session
 
-  set :public_folder, 'public'
+  set :public_folder, ::File.expand_path('../../../public', __FILE__)
   set :haml, :format => :html5
   set :views, ::File.expand_path('../../../haml', __FILE__)
 
