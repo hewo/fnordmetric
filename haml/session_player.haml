@@ -9,6 +9,7 @@
 
     %script(type="text/javascript" src="#{path_prefix}/fnordmetric.js")
     %link(type="text/css" rel="stylesheet" href="#{path_prefix}/fnordmetric.css")
+    %link(type="text/css" rel="stylesheet" href="#{path_prefix}/session_player.css")
 
     :javascript
       FnordMetric.p = '#{path_prefix}';
@@ -35,14 +36,43 @@
 
       #viewport
         .viewport_inner.clearfix
-
+          - name = 'NONAME'
+          - events.each do |e|
+            - name = events.delete(e)[:name] if e.type == '_set_name'
+          .headbar
+            %h2
+              = name
+            &nbsp;&nbsp;
+            %a{ class: 'close', href: '#', onclick: "FnordMetric.renderSessionView(); return false;"}='x'
+          %hr
+          - prev_event = {}
+          - events.reverse.reject{|x| x.type.start_with? '_'}.each_with_index do |event,i|
+            - backed = (event[:referrer] != prev_event[:url] && i > 0)
+            %div{ class: "event", 'data-status' => event[:_status], 'data-xhr' => event[:_xhr], 'data-backed' => backed, 'data-type' => event.type }
+              %time= Time.at(event[:_time]).strftime('%H:%M:%S') if event[:_time]
+              .body
+                %h3
+                  - case
+                  - when event[:title].present?
+                    = event[:title]
+                    %small= event.type
+                  - else
+                    = event.type
+                %a{ class: 'url', href: event[:url] }= event[:url]
+                %details
+                  %summary= "..."
+                  %dl
+                    - event.data.each_pair do |k,v|
+                      - if k.index('_') != 0
+                        %dt= k
+                        %dd= v
+            - if event[:_status] == 200 and not event[:_xhr]
+              - prev_event = event
 
 :javascript
+  FnordMetric.init('#{current_namespace.token}', $('.viewport_inner'));
+
   $(document).ready(function(){
-
-    FnordMetric.init('#{current_namespace.token}', $('.viewport_inner'));
-    FnordMetric.renderSessionView();
-
     $('#tabs li.dashboard').click(function(){
       FnordMetric.renderDashboard($(this).attr('rel'));
       window.location.hash = $(this).attr('rel');
@@ -62,19 +92,6 @@
       $('#viewport').width(viewport_width);
       FnordMetric.resizeView();
     }
-
     resizeViewport();
     $(window).resize(resizeViewport);
-
-    if(!#{current_namespace.active_users_available.to_s}) {
-      $('#tabs li:first').trigger('click');
-    }
-
-    if(window.location.hash){
-      $('#tabs li.dashboard[rel="'+window.location.hash.slice(1)+'"]').trigger('click');
-    }
-
   });
-
-
-

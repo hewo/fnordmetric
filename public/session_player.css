@@ -1,0 +1,98 @@
+.event {
+  border: 1px solid #ddd;
+  padding: 10px 20px;
+  margin: 10px 20px;
+}
+.event .body {
+  margin-left: 80px;
+}
+
+.event .body h3 {
+  margin: 0;
+}
+
+.event dl {
+  width: 100%; /* necessary? */
+  overflow:hidden;
+}
+.event dt {
+  float:left;
+  width:20%;
+  font-style: italic;
+  color: #999;
+}
+
+.event dd {
+  float:left;
+  width:80%;
+  padding: 0;
+  margin: 0;
+}
+
+.event time {
+  float: left;
+  width: 60px;
+  font-size: larger;
+  color: #999;
+}
+
+.event a.url, .message a, .session a {
+  color: #888;
+  text-decoration: none;
+}
+
+.event[data-backed] {
+  border-top: 10px solid #999;
+}
+
+.event[data-xhr] {
+  background-color: #eee;
+}
+
+.event[data-type="assemblies#progress"] {
+  display: none;
+}
+
+.event[data-type="tags#show"] {
+  background-color: #E7CBEF;
+}
+
+.event[data-type="document#gotosection"] {
+  background-color: #009460;
+}
+
+.event[data-type="document#chunk"] h3 {
+  background-image: url('http://jura.karnovgroup.dk/assets/marginalia/bookmark.png');
+  background-position: top right;
+  background-repeat: no-repeat;
+}
+
+.event[data-type="document#element"] h3 {
+  background-image: url('http://jura.karnovgroup.dk/assets/marginalia/section.png');
+  background-position: top right;
+  background-repeat: no-repeat;
+}
+
+.event[data-type="search#index"] h3 {
+  background-image: url('http://jura.karnovgroup.dk/assets/marginalia/search.png');
+  background-position: top right;
+  background-repeat: no-repeat;
+}
+
+.event[data-status="302"] {
+  background-color: #eee;
+}
+
+.event[data-status="302"] h3 {
+  color: #999;
+  font-weight: normal;
+}
+
+.event[data-status="302"] h3:before {
+  content: 'Redirect: ';
+}
+
+.event[data-status="302"] .url,
+.event[data-status="302"] .referrer {
+  display: none;
+}
