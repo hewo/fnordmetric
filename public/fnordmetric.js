@@ -704,7 +704,7 @@ var FnordMetric = (function() {
     }
 
     function resize(_width, _height) {
-      $('.sessions_feed').width(_width - 452);
+      $('.sessions_feed').width(_width - 502);
     }
 
     function startPoll() {

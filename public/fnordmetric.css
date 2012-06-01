@@ -125,7 +125,7 @@ ul.session_list li .history:hover{ color:#333; text-decoration:underline; }
 .sessions_feed ul.feed_inner li .time{ font-size:10px; line-height:20px; padding-top:19px; padding-right:10px; display:block; color:#999; float:right; font-style:italic; }
 .sessions_feed ul.feed_inner li .picture{ height:40px; overflow:hidden; width:40px; float:left; background:#333; margin:7px 10px 0 0; cursor:pointer; }
 .sessions_sidebar{ min-height:1200px; float:right; width:250px; border-left:1px solid #C7C9CC; }
-.events_sidebar{ min-height:1200px; float:left; width:200px; border-right:1px solid #C7C9CC; }
+.events_sidebar{ min-height:1200px; float:left; width:250px; border-right:1px solid #C7C9CC; }
 
 ul.event_type_list{ margin:10px; padding:0; }
 ul.event_type_list li{ list-style-type:none; color:#0A0A0A; margin-bottom:8px; height:18px; overflow:hidden; line-height:18px; padding:4px; }
