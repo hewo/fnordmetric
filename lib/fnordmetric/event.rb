@@ -13,7 +13,7 @@ module FnordMetric
         "#{opts[:namespace_prefix]}-timeline", 
         '+inf', opts[:since]||'0',
         range_opts
-      ).in_groups_of(2).map do |event_id, ts|
+      ).map do |event_id, ts|
         next if event_id.blank?
         find(event_id, opts).tap{ |e| e.time = ts }
       end
