@@ -1065,8 +1065,10 @@ var FnordMetric = (function() {
   }
 
   function resizeView() {
-    currentView.resize(
-    canvasElem.innerWidth(), canvasElem.innerHeight());
+    if (currentView){
+      currentView.resize(
+        canvasElem.innerWidth(), canvasElem.innerHeight());
+    }
   }
 
   function init(_namespace, _canvasElem) {
