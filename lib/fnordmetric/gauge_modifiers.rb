@@ -1,6 +1,7 @@
 module FnordMetric::GaugeModifiers
 
   def incr(gauge_name, value=1)
+    p "INC #{gauge_name} VALUE: #{value} - #{value.class.name}"
     gauge = fetch_gauge(gauge_name)
     assure_two_dimensional!(gauge)
     if gauge.unique? 
@@ -16,12 +17,22 @@ module FnordMetric::GaugeModifiers
     if gauge.progressive?      
       @redis.incrby(gauge.key(:head), value).callback do |head|
         @redis.hsetnx(gauge.key, gauge.tick_at(time), head).callback do |_new|
-          @redis.hincrby(gauge.key, gauge.tick_at(time), value) unless _new
+          unless _new
+            if value.is_a? String or value.is_a? Float
+              incr_float_value(gauge,value)
+            else
+              @redis.hincrby(gauge.key, gauge.tick_at(time), value) 
+            end
+          end
         end
       end
     else
       @redis.hsetnx(gauge.key, gauge.tick_at(time), 0).callback do
-        @redis.hincrby(gauge.key, gauge.tick_at(time), value)
+        if value.is_a? String or value.is_a? Float
+          incr_float_value(gauge,value)
+        else
+          @redis.hincrby(gauge.key, gauge.tick_at(time), value)
+        end
       end
     end
   end  
@@ -72,5 +83,11 @@ module FnordMetric::GaugeModifiers
     @redis.zadd(gauge.tick_key(time), value, field_name)
   end
 
+  private
+  def incr_float_value(gauge,value)
+    @redis.hget(gauge.key, gauge.tick_at(time)) do |base_val|
+      @redis.hset(gauge.key, gauge.tick_at(time),(base_val.to_f+value.to_f).round(4))
+    end
+  end
 
 end
